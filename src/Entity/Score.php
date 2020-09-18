@@ -35,12 +35,12 @@ class Score
         return $this->scoreId;
     }
 
-    public function getScoreMovementList(): ?array
+    public function getScoreNoteList(): ?array
     {
         return $this->scoreNoteList;
     }
 
-    public function setScoreMovementList(array $scoreNoteList): self
+    public function setScoreNoteList(array $scoreNoteList): self
     {
         $this->scoreNoteList = $scoreNoteList;
 
