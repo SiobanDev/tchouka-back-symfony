@@ -2,14 +2,12 @@
 
 namespace App\Entity;
 
-use ApiPlatform\Core\Annotation\ApiResource;
 use App\Repository\CompositionRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
- * @ApiResource()
  * @ORM\Entity(repositoryClass=CompositionRepository::class)
  */
 class Composition
@@ -19,45 +17,44 @@ class Composition
      * @ORM\GeneratedValue()
      * @ORM\Column(type="integer")
      */
-    private $id;
+    private $compositionId;
 
     /**
-     * @ORM\ManyToMany(targetEntity=percussion::class)
+     * @ORM\Column(type="json")
      */
-    private $percussions;
-
-    public function __construct()
-    {
-        $this->percussions = new ArrayCollection();
-    }
-
-    public function getId(): ?int
-    {
-        return $this->id;
-    }
+    private $compositionMovementList = [];
 
     /**
-     * @return Collection|percussion[]
+     * @ORM\ManyToOne(targetEntity=User::class, inversedBy="userCompositionList")
+     * @ORM\JoinColumn(nullable=false)
      */
-    public function getPercussions(): Collection
+    private $compositionUser;
+
+    public function getCompositionId(): ?int
     {
-        return $this->percussions;
+        return $this->compositionId;
     }
 
-    public function addPercussion(percussion $percussion): self
+    public function getCompositionMovementList(): ?array
     {
-        if (!$this->percussions->contains($percussion)) {
-            $this->percussions[] = $percussion;
-        }
+        return $this->compositionMovementList;
+    }
+
+    public function setCompositionMovementList(array $compositionMovementList): self
+    {
+        $this->compositionMovementList = $compositionMovementList;
 
         return $this;
     }
 
-    public function removePercussion(percussion $percussion): self
+    public function getCompositionUser(): ?User
     {
-        if ($this->percussions->contains($percussion)) {
-            $this->percussions->removeElement($percussion);
-        }
+        return $this->compositionUser;
+    }
+
+    public function setCompositionUser(?User $compositionUser): self
+    {
+        $this->compositionUser = $compositionUser;
 
         return $this;
     }
