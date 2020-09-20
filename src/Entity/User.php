@@ -3,9 +3,8 @@
 namespace App\Entity;
 
 use App\Repository\UserRepository;
-use Doctrine\Common\Collections\ArrayCollection;
-use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
+use Doctrine\Common\Collections\ArrayCollection;
 use Symfony\Component\Security\Core\User\UserInterface;
 
 /**
@@ -20,16 +19,15 @@ class User implements UserInterface
      */
     private $id;
 
-
-    /**
-     * @ORM\Column(type="string", length=255)
-     */
-    private $username;
-
     /**
      * @ORM\Column(type="string", length=180, unique=true)
      */
     private $email;
+
+    /**
+     * @ORM\Column(type="json")
+     */
+    private $roles = [];
 
     /**
      * @var string The hashed password
@@ -37,10 +35,6 @@ class User implements UserInterface
      */
     private $password;
 
-    /**
-     * @ORM\Column(type="json")
-     */
-    private $roles = [];
 
     /**
      * @ORM\OneToMany(targetEntity=Composition::class, mappedBy="compositionUser", orphanRemoval=true)
@@ -59,6 +53,7 @@ class User implements UserInterface
         $this->userScoreList = new ArrayCollection();
     }
 
+
     public function getId(): ?int
     {
         return $this->id;
@@ -76,14 +71,31 @@ class User implements UserInterface
         return $this;
     }
 
+    /**
+     * A visual identifier that represents this user.
+     *
+     * @see UserInterface
+     */
     public function getUsername(): string
     {
-        return (string) $this->username;
+        return (string) $this->email;
     }
 
-    public function setUsername(string $username): self
+    /**
+     * @see UserInterface
+     */
+    public function getRoles(): array
     {
-        $this->username = $username;
+        $roles = $this->roles;
+        // guarantee every user at least has ROLE_USER
+        $roles[] = 'ROLE_USER';
+
+        return array_unique($roles);
+    }
+
+    public function setRoles(array $roles): self
+    {
+        $this->roles = $roles;
 
         return $this;
     }
@@ -120,25 +132,6 @@ class User implements UserInterface
         // $this->plainPassword = null;
     }
 
-
-    /**
-     * @see UserInterface
-     */
-    public function getRoles(): array
-    {
-        $roles = $this->roles;
-        // guarantee every user at least has ROLE_USER
-        $roles[] = 'ROLE_USER';
-
-        return array_unique($roles);
-    }
-
-    public function setRoles(array $roles): self
-    {
-        $this->roles = $roles;
-
-        return $this;
-    }
 
     /**
      * @return Collection|Composition[]
