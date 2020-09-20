@@ -3,8 +3,6 @@
 namespace App\Entity;
 
 use App\Repository\ScoreRepository;
-use Doctrine\Common\Collections\ArrayCollection;
-use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
@@ -13,48 +11,76 @@ use Doctrine\ORM\Mapping as ORM;
 class Score
 {
     /**
-     * @ORM\Id()
-     * @ORM\GeneratedValue()
+     * @ORM\Id
+     * @ORM\GeneratedValue
      * @ORM\Column(type="integer")
      */
-    private $scoreId;
+    private $id;
+
+    /**
+     * @ORM\Column(type="string", length=255)
+     * @Assert\NotNull(message="The title can't be null.")
+     * @Assert\Length(
+     *      max = 255,
+     *      maxMessage = "Your first name cannot be longer than {{ limit }} characters",
+     *      allowEmptyString = false
+     * )
+     */
+    private $title;
 
     /**
      * @ORM\Column(type="json")
+     * @Assert\NotNull(message="The notes list can't be null.")
+     * @Assert\Json(
+     *     message = "You've entered an invalid Json."
+     * )
      */
-    private $scoreNoteList = [];
+    private $noteList = [];
 
     /**
-     * @ORM\ManyToOne(targetEntity=User::class, inversedBy="userScoreList")
+     * @ORM\ManyToOne(targetEntity=User::class, inversedBy="scores")
      * @ORM\JoinColumn(nullable=false)
+     * @Assert\NotNull(message="The user can't be null.")
      */
-    private $scoreUser;
+    private $user;
 
-    public function getScoreId(): ?int
+    public function getId(): ?int
     {
-        return $this->scoreId;
+        return $this->id;
     }
 
-    public function getScoreNoteList(): ?array
+    public function getTitle(): ?string
     {
-        return $this->scoreNoteList;
+        return $this->title;
     }
 
-    public function setScoreNoteList(array $scoreNoteList): self
+    public function setTitle(string $title): self
     {
-        $this->scoreNoteList = $scoreNoteList;
+        $this->title = $title;
 
         return $this;
     }
 
-    public function getScoreUser(): ?User
+    public function getNoteList(): ?array
     {
-        return $this->scoreUser;
+        return $this->noteList;
     }
 
-    public function setScoreUser(?User $scoreUser): self
+    public function setNoteList(array $noteList): self
     {
-        $this->scoreUser = $scoreUser;
+        $this->noteList = $noteList;
+
+        return $this;
+    }
+
+    public function getUser(): ?User
+    {
+        return $this->user;
+    }
+
+    public function setUser(?User $user): self
+    {
+        $this->user = $user;
 
         return $this;
     }

@@ -8,7 +8,7 @@ use Symfony\Component\Routing\Annotation\Route;
 class CompositionController extends AbstractController
 {
     /**
-     * @Route("/composition", name="composition", methods={"PUT"})
+     * @Route("/composition", name="composition")
      */
     public function index()
     {

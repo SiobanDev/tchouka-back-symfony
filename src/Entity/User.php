@@ -3,10 +3,11 @@
 namespace App\Entity;
 
 use App\Repository\UserRepository;
+use Doctrine\ORM\Mapping as ORM;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
-use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Security\Core\User\UserInterface;
+use Symfony\Component\Validator\Constraints as Assert;
 
 /**
  * @ORM\Entity(repositoryClass=UserRepository::class)
@@ -20,22 +21,17 @@ class User implements UserInterface
      */
     private $id;
 
-
-    /**
-     * @ORM\Column(type="string", length=255)
-     */
-    private $username;
-
     /**
      * @ORM\Column(type="string", length=180, unique=true)
+     * @Assert\NotBlank(message="The email must be defined.")
+     * @Assert\NotNull(message="The email can't be null.")
+     * @Assert\Email(
+     *     message = "The email '{{ value }}' is not a valid email."
+     * )
+     * @Assert\Regex(pattern="/^[^\W][a-zA-Z0-9_]+(\.[a-zA-Z0-9_]+)*\@[a-zA-Z0-9_]+(\.[a-zA-Z0-9_]+)*\.[a-zA-Z]{2,4}$/", message="")
+
      */
     private $email;
-
-    /**
-     * @var string The hashed password
-     * @ORM\Column(type="string")
-     */
-    private $password;
 
     /**
      * @ORM\Column(type="json")
@@ -43,21 +39,34 @@ class User implements UserInterface
     private $roles = [];
 
     /**
-     * @ORM\OneToMany(targetEntity=Composition::class, mappedBy="compositionUser", orphanRemoval=true)
+     * @var string The hashed password
+     * @ORM\Column(type="string")
+     * @Assert\NotBlank(message="The email must be defined.")
+     * @Assert\NotNull(message="The email can't be null.")
+     *
+     * @Assert\Regex(pattern="/^(?=.*[A-Z])(?=.*[a-z])(?=.*\d)(?=.*[-+!*$@%_])([-+!*$@%_\w]{8,32})$/", message="Your password must have at least 8 characters and must contain at lease one lowercase letter, one uppercase letter, one numeric digit, and one special character. ")
+     * @SecurityAssert\UserPassword(
+     *     message = "Wrong value for your current password"
+     * )
      */
-    private $userCompositionList;
+    private $password;
 
     /**
-     * @ORM\OneToMany(targetEntity=Score::class, mappedBy="scoreUser", orphanRemoval=true)
+     * @ORM\OneToMany(targetEntity=Score::class, mappedBy="user", orphanRemoval=true)
      */
-    private $userScoreList;
+    private $scores;
 
+    /**
+     * @ORM\OneToMany(targetEntity=Composition::class, mappedBy="user", orphanRemoval=true)
+     */
+    private $compositions;
 
     public function __construct()
     {
-        $this->userCompositionList = new ArrayCollection();
-        $this->userScoreList = new ArrayCollection();
+        $this->scores = new ArrayCollection();
+        $this->compositions = new ArrayCollection();
     }
+
 
     public function getId(): ?int
     {
@@ -76,14 +85,31 @@ class User implements UserInterface
         return $this;
     }
 
+    /**
+     * A visual identifier that represents this user.
+     *
+     * @see UserInterface
+     */
     public function getUsername(): string
     {
-        return (string) $this->username;
+        return (string) $this->email;
     }
 
-    public function setUsername(string $username): self
+    /**
+     * @see UserInterface
+     */
+    public function getRoles(): array
     {
-        $this->username = $username;
+        $roles = $this->roles;
+        // guarantee every user at least has ROLE_USER
+        $roles[] = 'ROLE_USER';
+
+        return array_unique($roles);
+    }
+
+    public function setRoles(array $roles): self
+    {
+        $this->roles = $roles;
 
         return $this;
     }
@@ -120,51 +146,31 @@ class User implements UserInterface
         // $this->plainPassword = null;
     }
 
-
     /**
-     * @see UserInterface
+     * @return Collection|Score[]
      */
-    public function getRoles(): array
+    public function getScores(): Collection
     {
-        $roles = $this->roles;
-        // guarantee every user at least has ROLE_USER
-        $roles[] = 'ROLE_USER';
-
-        return array_unique($roles);
+        return $this->scores;
     }
 
-    public function setRoles(array $roles): self
+    public function addScore(Score $score): self
     {
-        $this->roles = $roles;
-
-        return $this;
-    }
-
-    /**
-     * @return Collection|Composition[]
-     */
-    public function getUserCompositionList(): Collection
-    {
-        return $this->userCompositionList;
-    }
-
-    public function addUserCompositionList(Composition $userCompositionList): self
-    {
-        if (!$this->userCompositionList->contains($userCompositionList)) {
-            $this->userCompositionList[] = $userCompositionList;
-            $userCompositionList->setCompositionUser($this);
+        if (!$this->scores->contains($score)) {
+            $this->scores[] = $score;
+            $score->setUser($this);
         }
 
         return $this;
     }
 
-    public function removeUserCompositionList(Composition $userCompositionList): self
+    public function removeScore(Score $score): self
     {
-        if ($this->userCompositionList->contains($userCompositionList)) {
-            $this->userCompositionList->removeElement($userCompositionList);
+        if ($this->scores->contains($score)) {
+            $this->scores->removeElement($score);
             // set the owning side to null (unless already changed)
-            if ($userCompositionList->getCompositionUser() === $this) {
-                $userCompositionList->setCompositionUser(null);
+            if ($score->getUser() === $this) {
+                $score->setUser(null);
             }
         }
 
@@ -172,30 +178,30 @@ class User implements UserInterface
     }
 
     /**
-     * @return Collection|Score[]
+     * @return Collection|Composition[]
      */
-    public function getUserScoreList(): Collection
+    public function getCompositions(): Collection
     {
-        return $this->userScoreList;
+        return $this->compositions;
     }
 
-    public function addUserScoreList(Score $userScoreList): self
+    public function addComposition(Composition $composition): self
     {
-        if (!$this->userScoreList->contains($userScoreList)) {
-            $this->userScoreList[] = $userScoreList;
-            $userScoreList->setScoreUser($this);
+        if (!$this->compositions->contains($composition)) {
+            $this->compositions[] = $composition;
+            $composition->setUser($this);
         }
 
         return $this;
     }
 
-    public function removeUserScoreList(Score $userScoreList): self
+    public function removeComposition(Composition $composition): self
     {
-        if ($this->userScoreList->contains($userScoreList)) {
-            $this->userScoreList->removeElement($userScoreList);
+        if ($this->compositions->contains($composition)) {
+            $this->compositions->removeElement($composition);
             // set the owning side to null (unless already changed)
-            if ($userScoreList->getScoreUser() === $this) {
-                $userScoreList->setScoreUser(null);
+            if ($composition->getUser() === $this) {
+                $composition->setUser(null);
             }
         }
 
