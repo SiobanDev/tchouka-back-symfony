@@ -67,12 +67,12 @@ class AppFixtures extends Fixture
         for ($i = 0; $i < 10; $i++) {
             $user = new User();
       
-            $login = $faker->userName;
+            $email = $user->setEmail($faker->email);
       
             $user->setEmail($faker->email)
               ->setPassword($this->encoder->encodePassword(
                   $user,
-                  'pass_' . $login
+                  'pass_' . $email
               ));
       
             $manager->persist($user);
