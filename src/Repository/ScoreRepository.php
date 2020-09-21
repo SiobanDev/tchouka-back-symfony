@@ -23,7 +23,7 @@ class ScoreRepository extends ServiceEntityRepository
     /**
      * @return Score[] Returns an array of Score objects
      */
-    public function findAllUserScores($userId)
+    public function findByUser($userId)
     {
         return $this->createQueryBuilder('s')
             ->andWhere('s.user = :val')
@@ -42,7 +42,7 @@ class ScoreRepository extends ServiceEntityRepository
             ->getQuery()
             ->getOneOrNullResult()
         ;
-    }
+    }    
 
     // /**
     //  * @return Score[] Returns an array of Score objects

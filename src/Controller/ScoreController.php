@@ -3,7 +3,7 @@
 namespace App\Controller;
 
 use App\Repository\ScoreRepository;
-use App\Service\Score\ScoreService;
+use App\Service\ScoreService;
 use Doctrine\ORM\EntityManagerInterface;
 use Exception;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -41,7 +41,7 @@ class ScoreController extends AbstractController
 
     /**
      *
-     * @Route("/score", methods={"POST"})
+     * @Route("/api/score", methods={"POST"})
      * @param Request $request
      * @param ValidatorInterface $validator
      * @return JsonResponse
@@ -71,14 +71,14 @@ class ScoreController extends AbstractController
 
     /**
      *
-     * @Route("/scores")
+     * @Route("/api/scores")
      * @return JsonResponse
      */
     public function displayAll()
     {
         $user = $this->getUser();
         $userId = $user->getId();
-        $displayAllScores = $this->scoreRepository->findAllUserScores($userId);
+        $displayAllScores = $this->scoreRepository->findByUserfindAl($userId);
 
         return new JsonResponse($this->serializer->serialize($displayAllScores, 'json'), Response::HTTP_OK, [], true);
     }
@@ -87,7 +87,7 @@ class ScoreController extends AbstractController
     /**
      * To test the function with Postman, you need to set a 'score_id' key in the headers parameters
      *
-     * @Route("/score", methods={"DELETE"})
+     * @Route("/api/score", methods={"DELETE"})
      * @param EntityManagerInterface $entityManager
      * @return JsonResponse
      * @throws NonUniqueResultException

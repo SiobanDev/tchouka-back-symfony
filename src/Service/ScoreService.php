@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Service\Score;
+namespace App\Service;
 
 use App\Entity\User;
 use App\Entity\Score;
@@ -68,4 +68,19 @@ class ScoreService
             return null;
 
     }
+
+    public function removeAllScores($user)
+    {
+        $userId = $user->getId();
+        $scoresToDeleteList = $this->scoreRepository->findByUser($userId);
+
+        foreach ($scoresToDeleteList as $scoreToDeleteItem) {
+
+            $user->removeScore($scoreToDeleteItem);
+            // actually executes the queries (i.e. the INSERT query)
+            $this->entityManager->flush();
+        }
+        return null;
+    }
+
 }
