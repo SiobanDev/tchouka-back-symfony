@@ -8,7 +8,6 @@ use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Symfony\Component\Security\Core\User\UserInterface;
 use Symfony\Component\Validator\Constraints as Assert;
-use Symfony\Component\Security\Core\Validator\Constraints as SecurityAssert;
 use Symfony\Component\Serializer\Annotation\Groups;
 
 /**
@@ -32,7 +31,6 @@ class User implements UserInterface
      * @Assert\Email(
      *     message = "The email '{{ value }}' is not a valid email."
      * )
-     * @Assert\Regex(pattern="/^[^\W][a-zA-Z0-9_]+(\.[a-zA-Z0-9_]+)*\@[a-zA-Z0-9_]+(\.[a-zA-Z0-9_]+)*\.[a-zA-Z]{2,4}$/", message="")
      * @Groups({User::FRONT_DETAILS})
      */
     private $email;
@@ -47,9 +45,6 @@ class User implements UserInterface
      * @ORM\Column(type="string")
      * @Assert\NotBlank(message="The email must be defined.")
      * @Assert\Regex(pattern="/^(?=.*[A-Z])(?=.*[a-z])(?=.*\d)(?=.*[-+!*\.$@%_])([-+!*\.$@%_\w]{8,50})$/", message="Your password must have at least 8 characters and must contain at lease one lowercase letter, one uppercase letter, one numeric digit, and one special character. ")
-     * @SecurityAssert\UserPassword(
-     *     message = "Wrong value for your current password"
-     * )
      */
     private $password;
 
