@@ -32,11 +32,9 @@ class ScoreController extends AbstractController
      */
     public function __construct(
         SerializerInterface $serializer,
-        ScoreService $scoreService,
         ScoreRepository $scoreRepository
     ) {
         $this->serializer = $serializer;
-        $this->scoreService = $scoreService;
         $this->scoreRepository = $scoreRepository;
     }
 
