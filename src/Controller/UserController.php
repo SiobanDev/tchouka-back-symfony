@@ -11,22 +11,27 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\Security\Core\Encoder\UserPasswordEncoderInterface;
 
 class UserController extends AbstractController
 {
     private $userRepository;
+    private $passwordEncoder;
 
     /**
      * UserController constructor.
      * @param EntityManagerInterface $entityManager
      * @param UserRepository $userRepository
+     * @param UserPasswordEncoderInterface $passwordEncoder
      */
     public function __construct(
         EntityManagerInterface $entityManager,
-        UserRepository $userRepository
+        UserRepository $userRepository,
+        UserPasswordEncoderInterface $passwordEncoder
     ) {
         $this->entityManager = $entityManager;
         $this->userRepository = $userRepository;
+        $this->passwordEncoder = $passwordEncoder;
     }
 
     /**
@@ -56,10 +61,13 @@ class UserController extends AbstractController
         }
 
         //Check if there is already a user with this email
-        $userSearchResults = $this->userRepository->findOneBy(['email'=> $dataAssociativeArray['username']]);
+        $userSearchResults = $this->userRepository->findOneBy(['email'=> $dataAssociativeArray['email']]);
 
         if (empty($userSearchResults)) {
-            $user->setPassword($dataAssociativeArray['password']);
+            $user->setPassword($this->passwordEncoder->encodePassword(
+                $user,
+                $dataAssociativeArray['password']
+              ));
 
             $this->entityManager->persist($user);
             // actually executes the queries (i.e. the INSERT query)
@@ -69,7 +77,9 @@ class UserController extends AbstractController
                 User::FRONT_DETAILS,
             ]]);
         } else {
-            throw new Exception('Il existe déjà un compte avec cet email.', 403);
+            return $this->json([
+                "message" => 'Il existe déjà un compte avec cet email.'
+            ], Response::HTTP_FORBIDDEN);
         }
     }
 }
