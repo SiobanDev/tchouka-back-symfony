@@ -20,10 +20,10 @@ class Score
 
     /**
      * @ORM\Column(type="string", length=255)
-     * @Assert\NotNull(message="The title can't be null.")
+     * @Assert\NotNull(message="Le titre doit être défini.")
      * @Assert\Length(
      *      max = 255,
-     *      maxMessage = "Your first name cannot be longer than {{ limit }} characters",
+     *      maxMessage = "Le titre de la partition doit avoir moins de {{ limit }} caractères.",
      *      allowEmptyString = false
      * )
      */
@@ -31,9 +31,9 @@ class Score
 
     /**
      * @ORM\Column(type="json")
-     * @Assert\NotNull(message="The notes list can't be null.")
+     * @Assert\NotNull(message="La liste des notes ne peut être vide.")
      * @Assert\Json(
-     *     message = "You've entered an invalid Json."
+     *     message = "Json invalide"
      * )
      */
     private $noteList = [];
@@ -41,7 +41,7 @@ class Score
     /**
      * @ORM\ManyToOne(targetEntity=User::class, inversedBy="scores")
      * @ORM\JoinColumn(nullable=false)
-     * @Assert\NotNull(message="The user can't be null.")
+     * @Assert\NotNull(message="L'utilisat.eur.rice ne peut pas être nul.le.")
      */
     private $user;
 

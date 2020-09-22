@@ -11,27 +11,22 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\Security\Core\Encoder\UserPasswordEncoderInterface;
 
 class UserController extends AbstractController
 {
     private $userRepository;
-    private $passwordEncoder;
 
     /**
      * UserController constructor.
      * @param EntityManagerInterface $entityManager
      * @param UserRepository $userRepository
-     * @param UserPasswordEncoderInterface $passwordEncoder
      */
     public function __construct(
         EntityManagerInterface $entityManager,
-        UserRepository $userRepository,
-        UserPasswordEncoderInterface $passwordEncoder
+        UserRepository $userRepository
     ) {
         $this->entityManager = $entityManager;
         $this->userRepository = $userRepository;
-        $this->passwordEncoder = $passwordEncoder;
     }
 
     /**
@@ -64,16 +59,15 @@ class UserController extends AbstractController
         $userSearchResults = $this->userRepository->findOneBy(['email'=> $dataAssociativeArray['email']]);
 
         if (empty($userSearchResults)) {
-            $user->setPassword($this->passwordEncoder->encodePassword(
-                $user,
+            $user->setPassword(
                 $dataAssociativeArray['password']
-              ));
+            );
 
             $this->entityManager->persist($user);
             // actually executes the queries (i.e. the INSERT query)
             $this->entityManager->flush();
             
-            return $this->json($user, Response::HTTP_CREATED, ['groups' => [
+            return $this->json(null, Response::HTTP_CREATED, ['groups' => [
                 User::FRONT_DETAILS,
             ]]);
         } else {
