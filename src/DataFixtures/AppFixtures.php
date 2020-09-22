@@ -14,11 +14,11 @@ use Symfony\Component\Security\Core\Encoder\UserPasswordEncoderInterface;
 
 class AppFixtures extends Fixture
 {
-    private $encoder;
+    private $passwordEncoder;
 
-    public function __construct(UserPasswordEncoderInterface $encoder)
+    public function __construct(UserPasswordEncoderInterface $passwordEncoder)
     {
-        $this->encoder = $encoder;
+        $this->passwordEncoder = $passwordEncoder;
     }
     public function load(ObjectManager $manager)
     {
@@ -70,9 +70,9 @@ class AppFixtures extends Fixture
             $email = $faker->email;
       
             $user->setEmail($email)
-              ->setPassword($this->encoder->encodePassword(
+              ->setPassword($this->passwordEncoder->encodePassword(
                   $user,
-                  'pass_' . $email
+                  'Pass_1_' . $email
               ));
       
             $manager->persist($user);

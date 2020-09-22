@@ -9,28 +9,31 @@ use Doctrine\Common\Collections\Collection;
 use Symfony\Component\Security\Core\User\UserInterface;
 use Symfony\Component\Validator\Constraints as Assert;
 use Symfony\Component\Security\Core\Validator\Constraints as SecurityAssert;
+use Symfony\Component\Serializer\Annotation\Groups;
 
 /**
  * @ORM\Entity(repositoryClass=UserRepository::class)
  */
 class User implements UserInterface
 {
+    const FRONT_DETAILS = "User::self";
+
     /**
      * @ORM\Id
      * @ORM\GeneratedValue
      * @ORM\Column(type="integer")
+     * @Groups({User::FRONT_DETAILS})
      */
     private $id;
 
     /**
      * @ORM\Column(type="string", length=180, unique=true)
      * @Assert\NotBlank(message="The email must be defined.")
-     * @Assert\NotNull(message="The email can't be null.")
      * @Assert\Email(
      *     message = "The email '{{ value }}' is not a valid email."
      * )
      * @Assert\Regex(pattern="/^[^\W][a-zA-Z0-9_]+(\.[a-zA-Z0-9_]+)*\@[a-zA-Z0-9_]+(\.[a-zA-Z0-9_]+)*\.[a-zA-Z]{2,4}$/", message="")
-
+     * @Groups({User::FRONT_DETAILS})
      */
     private $email;
 
@@ -43,9 +46,7 @@ class User implements UserInterface
      * @var string The hashed password
      * @ORM\Column(type="string")
      * @Assert\NotBlank(message="The email must be defined.")
-     * @Assert\NotNull(message="The email can't be null.")
-     *
-     * @Assert\Regex(pattern="/^(?=.*[A-Z])(?=.*[a-z])(?=.*\d)(?=.*[-+!*$@%_])([-+!*$@%_\w]{8,32})$/", message="Your password must have at least 8 characters and must contain at lease one lowercase letter, one uppercase letter, one numeric digit, and one special character. ")
+     * @Assert\Regex(pattern="/^(?=.*[A-Z])(?=.*[a-z])(?=.*\d)(?=.*[-+!*\.$@%_])([-+!*\.$@%_\w]{8,50})$/", message="Your password must have at least 8 characters and must contain at lease one lowercase letter, one uppercase letter, one numeric digit, and one special character. ")
      * @SecurityAssert\UserPassword(
      *     message = "Wrong value for your current password"
      * )
@@ -54,11 +55,13 @@ class User implements UserInterface
 
     /**
      * @ORM\OneToMany(targetEntity=Score::class, mappedBy="user", orphanRemoval=true)
+     * @Groups({User::FRONT_DETAILS})
      */
     private $scores;
 
     /**
      * @ORM\OneToMany(targetEntity=Composition::class, mappedBy="user", orphanRemoval=true)
+     * @Groups({User::FRONT_DETAILS})
      */
     private $compositions;
 

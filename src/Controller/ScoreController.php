@@ -2,6 +2,7 @@
 
 namespace App\Controller;
 
+use App\Entity\Score;
 use App\Repository\ScoreRepository;
 use App\Service\ScoreService;
 use Doctrine\ORM\EntityManagerInterface;
@@ -51,22 +52,53 @@ class ScoreController extends AbstractController
         Request $request,
         ValidatorInterface $validator
     ) {
-        $user = $this->getUser();
+        $connectedUser = $this->getUser();
+        $newScore = json_decode($request->getContent(), true);
+
         $scoreTitle = $request->request->get('scoreTitle');
         $scoreNoteList = $request->request->get('noteList');
 
         try {
-            $this->scoreService->add($validator, $this->getUser(), $scoreTitle, $scoreNoteList);
+            $score = new Score();
+            
+            //Get the score with the same parameters as those from the request
+    
+            //Check if there's already a score with the same parameters as those from the request and prevent the creation if it's the case
+            $score->setUser($connectedUser);
+            $score->setTitle($scoreTitle);
+            $score->setNoteList($scoreNoteList);
+    
+            $errors = $validator->validate($score);
+    
+            if (count($errors) > 0) {
+                /*
+                 * Uses a __toString method on the $errors variable which is a ConstraintViolationList object. This gives us a nice string for debugging.
+                 */
+                // $errorsString = (string)$errors;
+    
+                $score = null;
+                throw new Exception('incorrect score data', 500);
+            }
+    
+            // tell Doctrine you want to (eventually) save the score (no queries yet)
+            $this->entityManager->persist($score);
+    
+            // actually executes the queries (i.e. the INSERT query)
+            $this->entityManager->flush();
+    
+    
+            return new JsonResponse(
+                $this->serializer->serialize(
+                        $$newScore,
+                        'json'
+                    ),
+                Response::HTTP_CREATED,
+                [],
+                true
+            );
         } catch (\Exception $e) {
             throw new Exception($e);
         }
-
-        return new JsonResponse(
-            null,
-            Response::HTTP_CREATED,
-            [],
-            true
-        );
     }
 
     /**
