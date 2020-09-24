@@ -13,7 +13,7 @@ class CompositionType extends AbstractType
     {
         $builder
             ->add('title')
-            ->add('movementList')
+            // ->add('movementList')
             ->add('user')
         ;
     }
@@ -23,6 +23,7 @@ class CompositionType extends AbstractType
         $resolver->setDefaults([
             'data_class' => Composition::class,
             'csrf_protection' => false,
+            'allow_extra_fields' => true
         ]);
     }
 }

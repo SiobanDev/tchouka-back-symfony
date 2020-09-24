@@ -16,20 +16,20 @@ use Symfony\Component\Serializer\SerializerInterface;
 
 class CompositionController extends AbstractController
 {
-    private $serializer;
-    /**
-     * @var CompositionRepository
-     */
+    private $entityManager;
     private $compositionRepository;
 
     /**
      * CompositionController constructor.
-     * @param SerializerInterface $serializer
+     * @param EntityManagerInterface $entityManager
+     * @param CompositionRepository $compositionRepository
      */
     public function __construct(
-        SerializerInterface $serializer
+        EntityManagerInterface $entityManager,
+        CompositionRepository $compositionRepository
     ) {
-        $this->serializer = $serializer;
+        $this->entityManager = $entityManager;
+        $this->compositionRepository = $compositionRepository;
     }
 
     /**
@@ -42,9 +42,12 @@ class CompositionController extends AbstractController
     public function add(
         Request $request
     ) {
+                //TODO : add a JSON asset in the Score entity, add the field noteList in the ScoreType and try to resolve bug of noteList type
+
         $newComposition = new Composition();
         $form = $this->createForm(CompositionType::class, $newComposition);
         $dataAssociativeArray = json_decode($request->getContent(), true);
+        $dataAssociativeArray['movementList'] = json_decode($dataAssociativeArray['movementList'], true);
 
         $form->submit($dataAssociativeArray);
 
@@ -55,6 +58,9 @@ class CompositionController extends AbstractController
                 "message" => 'Vous ne pouvez pas sauvegarder de composition : ' . $errors
             ], Response::HTTP_BAD_REQUEST);
         }
+
+        $newComposition->setMovementList($dataAssociativeArray['movementList']);
+
 
         $this->entityManager->persist($newComposition);
         // actually executes the queries (i.e. the INSERT query)

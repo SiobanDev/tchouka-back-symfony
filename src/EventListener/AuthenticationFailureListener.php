@@ -1,6 +1,6 @@
 <?php
 
-namespace App\EventListener\AuthenticationFailureResponse;
+namespace App\EventListener;
 
 use Lexik\Bundle\JWTAuthenticationBundle\Event\JWTExpiredEvent;
 use Lexik\Bundle\JWTAuthenticationBundle\Event\JWTFailureEventInterface;

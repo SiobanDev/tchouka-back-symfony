@@ -14,6 +14,7 @@ use Symfony\Component\HttpFoundation\Response;
 
 class UserController extends AbstractController
 {
+    private $entityManager;
     private $userRepository;
 
     /**

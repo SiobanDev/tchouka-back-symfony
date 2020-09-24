@@ -13,7 +13,7 @@ class ScoreType extends AbstractType
     {
         $builder
             ->add('title')
-            ->add('noteList')
+            // ->add('noteList')
             ->add('user')
         ;
     }
@@ -23,6 +23,7 @@ class ScoreType extends AbstractType
         $resolver->setDefaults([
             'data_class' => Score::class,
             'csrf_protection' => false,
+            'allow_extra_fields' => true
         ]);
     }
 }

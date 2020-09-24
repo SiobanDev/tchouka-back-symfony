@@ -32,9 +32,6 @@ class Score
     /**
      * @ORM\Column(type="json")
      * @Assert\NotNull(message="La liste des notes ne peut être vide.")
-     * @Assert\Json(
-     *     message = "Json invalide"
-     * )
      */
     private $noteList = [];
 

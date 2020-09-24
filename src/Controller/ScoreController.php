@@ -16,20 +16,20 @@ use Symfony\Component\Serializer\SerializerInterface;
 
 class ScoreController extends AbstractController
 {
-    private $serializer;
-    /**
-     * @var ScoreRepository
-     */
+    private $entityManager;
     private $scoreRepository;
 
     /**
      * ScoreController constructor.
-     * @param SerializerInterface $serializer
+     * @param EntityManagerInterface $entityManager
+     * @param ScoreRepository $scoreRepository
      */
     public function __construct(
-        SerializerInterface $serializer
+        EntityManagerInterface $entityManager,
+        ScoreRepository $scoreRepository
     ) {
-        $this->serializer = $serializer;
+        $this->entityManager = $entityManager;
+        $this->scoreRepository = $scoreRepository;
     }
 
     /**
@@ -42,9 +42,13 @@ class ScoreController extends AbstractController
     public function add(
         Request $request
     ) {
+        //TODO : add a JSON asset in the Score entity, add the field noteList in the ScoreType and try to resolve bug of noteList type
+        
         $newScore = new Score();
         $form = $this->createForm(ScoreType::class, $newScore);
         $dataAssociativeArray = json_decode($request->getContent(), true);
+
+        $dataAssociativeArray['noteList'] = json_decode($dataAssociativeArray['noteList'], true);
 
         $form->submit($dataAssociativeArray);
 
@@ -55,6 +59,8 @@ class ScoreController extends AbstractController
                 "message" => 'Vous ne pouvez pas sauvegarder de partition : ' . $errors
             ], Response::HTTP_BAD_REQUEST);
         }
+
+        $newScore->setNoteList($dataAssociativeArray['noteList']);
 
         $this->entityManager->persist($newScore);
         // actually executes the queries (i.e. the INSERT query)

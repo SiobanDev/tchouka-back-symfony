@@ -32,9 +32,6 @@ class Composition
     /**
      * @ORM\Column(type="json")
      * @Assert\NotNull(message="La liste des mouvements ne peut être vide.")
-     * @Assert\Json(
-     *     message = "Json invalide"
-     * )
      */
     private $movementList = [];
 
