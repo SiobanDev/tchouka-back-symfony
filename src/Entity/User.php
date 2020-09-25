@@ -8,7 +8,6 @@ use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Symfony\Component\Security\Core\User\UserInterface;
 use Symfony\Component\Validator\Constraints as Assert;
-use Symfony\Component\Security\Core\Validator\Constraints as SecurityAssert;
 use Symfony\Component\Serializer\Annotation\Groups;
 
 /**
@@ -16,13 +15,14 @@ use Symfony\Component\Serializer\Annotation\Groups;
  */
 class User implements UserInterface
 {
-    const FRONT_DETAILS = "User::self";
+    const GROUP_SELF = "User::self";
+    const GROUP_SCORES = "User::scores";
+    const GROUP_COMPOSITIONS = "User::compositions";
 
     /**
      * @ORM\Id
      * @ORM\GeneratedValue
      * @ORM\Column(type="integer")
-     * @Groups({User::FRONT_DETAILS})
      */
     private $id;
 
@@ -32,7 +32,7 @@ class User implements UserInterface
      * @Assert\Email(
      *     message = "L'email '{{ value }}' n'est pas au bon format."
      * )
-     * @Groups({User::FRONT_DETAILS})
+     * @Groups({User::GROUP_SELF})
      */
     private $email;
 
@@ -51,13 +51,13 @@ class User implements UserInterface
 
     /**
      * @ORM\OneToMany(targetEntity=Score::class, mappedBy="user", orphanRemoval=true)
-     * @Groups({User::FRONT_DETAILS})
+     * @Groups({User::GROUP_SCORES})
      */
     private $scores;
 
     /**
      * @ORM\OneToMany(targetEntity=Composition::class, mappedBy="user", orphanRemoval=true)
-     * @Groups({User::FRONT_DETAILS})
+     * @Groups({User::GROUP_COMPOSITIONS})
      */
     private $compositions;
 

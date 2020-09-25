@@ -13,6 +13,7 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Serializer\SerializerInterface;
+use Symfony\Component\Validator\Constraints\Length;
 
 class ScoreController extends AbstractController
 {
@@ -69,6 +70,34 @@ class ScoreController extends AbstractController
         return $this->json(null, Response::HTTP_CREATED);
     }
 
+
+    /**
+     *
+     * @Route("/api/scores", methods={"GET"})
+     * @param Request $request
+     * @return JsonResponse
+     * @throws Exception
+     */
+    public function displayAll(
+    ) {
+        $user = $this->getUser();
+
+        $scoreData = $this->scoreRepository->findByUser($user->getId());
+
+        if (empty($scoreData)) {
+            throw new Exception('Aucune donnée ne correspond à l\'utilisateurice indiqué.e.', Response::HTTP_BAD_REQUEST);
+        }
+
+        $notesScoresData = [];
+
+        for ($i = 0; $i < count($scoreData); $i++) {
+            $score = ["id" => $scoreData[$i]->getId(), "title" => $scoreData[$i]->getTitle(), "notes" => $scoreData[$i]->getNoteList() ];
+            array_push($notesScoresData, $score);
+        }
+
+        return $this->json($notesScoresData, Response::HTTP_OK);    
+    }
+
     /**
      * To test the function with Postman, you need to set a 'score_id' key in the headers parameters
      *
@@ -83,8 +112,9 @@ class ScoreController extends AbstractController
         EntityManagerInterface $entityManager
     ) {
         $user = $this->getUser();
-        $scoreId = $request->request->get('id');
-        $scoreToDelete = $this->scoreRepository->findOneById($scoreId);
+        $scoreId = json_decode($request->getContent(), true);
+        
+        $scoreToDelete = $this->scoreRepository->findOneByID($scoreId);
 
         //Check if the score to delete is in the BDD
         if (empty($scoreToDelete)) {

@@ -5,12 +5,16 @@ namespace App\Entity;
 use App\Repository\CompositionRepository;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Validator\Constraints as Assert;
+use Symfony\Component\Serializer\Annotation\Groups;
 
 /**
  * @ORM\Entity(repositoryClass=CompositionRepository::class)
  */
 class Composition
 {
+    const GROUP_SELF = "Composition::self";
+    const GROUP_USER = "Composition::user";
+
     /**
      * @ORM\Id
      * @ORM\GeneratedValue
@@ -26,12 +30,14 @@ class Composition
      *      maxMessage = "Le titre de la composition doit avoir moins de {{ limit }} caractères.",
      *      allowEmptyString = false
      * )
+     * @Groups({Composition::GROUP_SELF})
      */
     private $title;
 
     /**
      * @ORM\Column(type="json")
      * @Assert\NotNull(message="La liste des mouvements ne peut être vide.")
+     * @Groups({Composition::GROUP_SELF})
      */
     private $movementList = [];
 
@@ -39,6 +45,7 @@ class Composition
      * @ORM\ManyToOne(targetEntity=User::class, inversedBy="compositions")
      * @ORM\JoinColumn(nullable=false)
      * @Assert\NotNull(message="L'utilisat.eur.rice ne peut pas être nul.le.")
+     * @Groups({Composition::GROUP_USER})
      */
     private $user;
 

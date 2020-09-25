@@ -5,12 +5,16 @@ namespace App\Entity;
 use App\Repository\ScoreRepository;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Validator\Constraints as Assert;
+use Symfony\Component\Serializer\Annotation\Groups;
 
 /**
  * @ORM\Entity(repositoryClass=ScoreRepository::class)
  */
 class Score
 {
+    const GROUP_SELF = "Score::self";
+    const GROUP_USER = "Score::user";
+
     /**
      * @ORM\Id
      * @ORM\GeneratedValue
@@ -26,12 +30,14 @@ class Score
      *      maxMessage = "Le titre de la partition doit avoir moins de {{ limit }} caractères.",
      *      allowEmptyString = false
      * )
+     * @Groups({Score::GROUP_SELF})
      */
     private $title;
 
     /**
      * @ORM\Column(type="json")
      * @Assert\NotNull(message="La liste des notes ne peut être vide.")
+     * @Groups({Score::GROUP_SELF})
      */
     private $noteList = [];
 
@@ -39,6 +45,7 @@ class Score
      * @ORM\ManyToOne(targetEntity=User::class, inversedBy="scores")
      * @ORM\JoinColumn(nullable=false)
      * @Assert\NotNull(message="L'utilisat.eur.rice ne peut pas être nul.le.")
+     * @Groups({Score::GROUP_USER})
      */
     private $user;
 

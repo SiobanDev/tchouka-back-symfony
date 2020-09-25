@@ -9,7 +9,7 @@ use Lexik\Bundle\JWTAuthenticationBundle\Event\JWTNotFoundEvent;
 use Lexik\Bundle\JWTAuthenticationBundle\Response\JWTAuthenticationFailureResponse;
 use Symfony\Component\HttpFoundation\JsonResponse;
 
-class AuthenticationFailureResponse
+class AuthenticationFailureListener
 {
     
 /**

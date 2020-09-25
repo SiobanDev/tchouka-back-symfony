@@ -1,9 +1,12 @@
 <?php
 namespace App\Controller;
 
+use App\Entity\Composition;
+use App\Entity\Score;
 use App\Entity\User;
 use App\Form\UserType;
 use App\Repository\UserRepository;
+use Doctrine\Common\Annotations\AnnotationReader;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Routing\Annotation\Route;
 use Exception;
@@ -11,21 +14,32 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\Serializer\Encoder\JsonEncoder;
+use Symfony\Component\Serializer\Encoder\XmlEncoder;
+use Symfony\Component\Serializer\Mapping\Factory\ClassMetadataFactory;
+use Symfony\Component\Serializer\Mapping\Loader\AnnotationLoader;
+use Symfony\Component\Serializer\Normalizer\ObjectNormalizer;
+use Symfony\Component\Serializer\Serializer;
+use Symfony\Component\Serializer\SerializerInterface;
 
 class UserController extends AbstractController
 {
     private $entityManager;
     private $userRepository;
+    private $serializer;
 
     /**
      * UserController constructor.
      * @param EntityManagerInterface $entityManager
      * @param UserRepository $userRepository
+     * @param SerializerInterface $serializer
      */
     public function __construct(
+        SerializerInterface $serializer,
         EntityManagerInterface $entityManager,
         UserRepository $userRepository
     ) {
+        $this->serializer = $serializer;
         $this->entityManager = $entityManager;
         $this->userRepository = $userRepository;
     }
@@ -69,12 +83,74 @@ class UserController extends AbstractController
             $this->entityManager->flush();
             
             return $this->json(null, Response::HTTP_CREATED, ['groups' => [
-                User::FRONT_DETAILS,
+                User::GROUP_SELF,
             ]]);
         } else {
             return $this->json([
                 "message" => 'Il existe déjà un compte avec cet email.'
             ], Response::HTTP_FORBIDDEN);
         }
+    }
+
+
+    /**
+     * @Route("/api/user", methods={"GET"})
+     * @param Request $request
+     * @return JsonResponse
+     * @throws Exception
+     */
+    public function display(
+    ) {
+        // $encoders = [new XmlEncoder(), new JsonEncoder()];
+        // $classMetadataFactory = new ClassMetadataFactory(new AnnotationLoader(new AnnotationReader()));
+        // $normalizer = [new ObjectNormalizer($classMetadataFactory)];
+        // $serializer = new Serializer($normalizer, $encoders);
+
+
+        $user = $this->getUser();
+
+        $connectedUserData = $this->userRepository->findOneBy(['id' => $user->getId()]);
+
+        if (empty($connectedUserData)) {
+            throw new Exception('Aucune donnée ne correspond à l\'utilisateurice indiqué.e.', Response::HTTP_BAD_REQUEST);
+        }
+
+        // return $this->json($connectedUserData, Response::HTTP_OK, ['groups' => [
+        //     User::GROUP_SELF,
+        //     User::GROUP_SCORES,
+        //     Score::GROUP_SELF,
+        //     User::GROUP_COMPOSITIONS,
+        //     Composition::GROUP_SELF,
+        // ]]);
+
+        return $this->json($user->getEmail(), Response::HTTP_OK);        
+
+        // return $this->json($connectedUserData, Response::HTTP_OK, ['groups' => [
+        //     'user'
+        // ]]);
+
+        // return new JsonResponse(
+        //     $serializer->serialize(
+        //         $user,
+        //         'json'
+        //     ),
+        //     Response::HTTP_CREATED,
+        //     ['groups' => [
+        //     'user',
+        //     ]],
+        //     true
+        // );
+
+        //         return new JsonResponse(
+        //     $this->serializer->serialize(
+        //         $user,
+        //         'json'
+        //     ),
+        //     Response::HTTP_CREATED,
+        //     ['groups' => [
+        //         'user',
+        //     ]],
+        //     true
+        // );
     }
 }

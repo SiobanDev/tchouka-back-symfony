@@ -69,6 +69,34 @@ class CompositionController extends AbstractController
         return $this->json(null, Response::HTTP_CREATED);
     }
 
+
+    /**
+     *
+     * @Route("/api/compositions", methods={"GET"})
+     * @param Request $request
+     * @return JsonResponse
+     * @throws Exception
+     */
+    public function displayAll(
+        ) {
+            $user = $this->getUser();
+    
+            $compositionData = $this->compositionRepository->findByUser($user->getId());
+    
+            if (empty($compositionData)) {
+                throw new Exception('Aucune donnée ne correspond à l\'utilisateurice indiqué.e.', Response::HTTP_BAD_REQUEST);
+            }
+    
+            $movementsCompositionData = [];
+    
+            for ($i = 0; $i < count($compositionData); $i++) {
+                $composition = ["id" => $compositionData[$i]->getId(), "title" => $compositionData[$i]->getTitle(), "notes" => $compositionData[$i]->getMovementList() ];
+                array_push($movementsCompositionData, $composition);
+            }
+    
+            return $this->json($movementsCompositionData, Response::HTTP_OK);    
+        }
+
     /**
      * To test the function with Postman, you need to set a 'composition_id' key in the headers parameters
      *
@@ -83,7 +111,7 @@ class CompositionController extends AbstractController
         EntityManagerInterface $entityManager
     ) {
         $user = $this->getUser();
-        $compositionId = $request->request->get('id');
+        $compositionId = json_decode($request->getContent(), true);
         $compositionToDelete = $this->compositionRepository->findOneById($compositionId);
 
         //Check if the composition to delete is in the BDD
